@@ -90,8 +90,8 @@ pipeline {
 
 def getBuildArgs() {
   def envArgs = [
-    APPLICATION_NAME: env.APPLICATION_NAME,
-    PORT: env.PORT,
+    APPLICATION_NAME_ARG: env.APPLICATION_NAME,
+    PORT_ARG: env.PORT,
   ]
 
   def str = new StringBuilder()
