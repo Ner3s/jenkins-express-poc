@@ -10,4 +10,5 @@ app.get('/', (req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
+  console.log(`Server run in BRANCH MAIN`);
 })
