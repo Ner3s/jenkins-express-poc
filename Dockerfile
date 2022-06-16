@@ -1,17 +1,23 @@
-FROM node:18-alpine 
+FROM node:16-alpine 
 
+# CREATE APP FOLDER
 WORKDIR /app
 
-ARG PORT
-ARG APPLICATION_NAME
+# GET ARGUMENTS FOR BUILD
+ARG APPLICATION_NAME_ARG
+ARG PORT_ARG
 
+# PASS ARG's TO ENV FOR PERSIST AFTER BUILD
+ENV APPLICATION_NAME=$APPLICATION_NAME_ARG
+ENV PORT=$PORT_ARG
+
+# COPY FILES TO APP FOLDER IN CONTAINER
 COPY package*.json .
 COPY yarn.lock .
 COPY server.js .
 
+# INSTALL DEPENDENCIES
 RUN yarn install
 
-ENTRYPOINT [ "yarn", "start" ]
-
-## Verificar os plugins instalados no jenkins e validar passo a passo.
-## SUBIR REPOSITÓRIO
+# RUN THE APP
+ENTRYPOINT [ "node", "server.js" ]
