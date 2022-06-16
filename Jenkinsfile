@@ -1,9 +1,10 @@
 pipeline {
-    agent {
-      docker {
-        image "node:16-alpine"
-      }
-    }
+    agent any
+    // agent {
+    //   docker {
+    //     image "node:16-alpine"
+    //   }
+    // }
     environment {
       APP_NAME = "${env.APPLICATION_NAME}"
       ENVIRONMENT = "${env.NODE_ENV == "production" ? "prod" : "qa"}"
