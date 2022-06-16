@@ -1,89 +1,86 @@
 pipeline {
     agent {
       docker {
-        image "node:16-apline"
+        image "node:16-alpine"
       }
     }
-
-    APP_NAME = env.APPLICATION_NAME
-    ENVIRONMENT = env.NODE_ENV == "production" ? "prod" : "qa"
-    APP_VERSION = ""
+    environment {
+      APP_NAME = "${env.APPLICATION_NAME}"
+      ENVIRONMENT = env.NODE_ENV == "production" ? "prod" : "qa"
+      APP_VERSION = getPackageJsonVersion(env.UPDATE_TYPE)
+      BRANCH = env.BRANCH_TO_BUILD.replaceAll("origin/", "")
+    }
 
     stages {
-      def BRANCH = env.BRANCH_TO_BUILD.replaceAll("origin/", "")
 
-      deleteDir()
-
-      try {
         stage("Proceed to deploy?") {
-          timeout(time: 30, unit: "MINUTES") {
-            input("Deseja proceder com o Deploy no ambiente de ${ENVIRONMENT}?")
+          steps {
+            timeout(time: 30, unit: "MINUTES") {
+              input("Deseja proceder com o Deploy no ambiente de ${ENVIRONMENT}?")
+            }
           }
         }
 
         stage("Update version") {
-          APP_VERSION = getPackageJsonVersion(env.UPDATE_TYPE)
-          updatePackageJsonVersion(APP_VERSION)
+          steps {
+            updatePackageJsonVersion(APP_VERSION)
+          }
         }
 
-        // stage("Install dependencies") {
-        //   sh "yarn install"
-        // }
-
-        // stage("Run tests") {
-        //   sh "yarn run test"
-        // }
-
-        // stage("Build") {
-        //   sh "yarn run build"
-        // }
-
         stage("Create docker image") {
-          sh "docker build -t ${APP_NAME}:${APP_VERSION} ."
+          steps {
+            sh "docker build -t ${APP_NAME}:${APP_VERSION} ."
+          }
         }
 
         stage("Create docker container") {
-          sh "docker run -d --name ${APP_NAME} ${getBuildArgs()} -p ${env.PORT}:${env.PORT} ${APP_NAME}:${APP_VERSION}"
+          steps {
+            sh "docker run -d --name ${APP_NAME} ${getBuildArgs()} -p ${env.PORT}:${env.PORT} ${APP_NAME}:${APP_VERSION}"
+          }
         }
 
         stage("Push new version") {
-          if (env.UPDATE_TYPE != 'NONE') {
-            sh "git checkout -b ${BRANCH}"
-            sh "git add package.json"
-            sh "git commit -m 'chore(jenkins): update version to ${APP_VERSION}'"
-            sh "git push ${env.REPO_URL} ${BRANCH}"
-          } else {
-            print "this step will be performed if the version is changed"
+          steps {
+            if (env.UPDATE_TYPE != 'NONE') {
+              sh "git checkout -b ${BRANCH}"
+              sh "git add package.json"
+              sh "git commit -m 'chore(jenkins): update version to ${APP_VERSION}'"
+              sh "git push ${env.REPO_URL} ${BRANCH}"
+            } else {
+              print "this step will be performed if the version is changed"
+            }
           }
         }
 
         stage("Add version tag") {
-          if (env.UPDATE_TYPE != 'NONE') {
-            sh "git tag v${APP_VERSION}"
-            sh "git push ${env.REPO_URL} --tags"
-          } else {
-            print "this step will be performed if the version is changed"
+          steps {
+            if (env.UPDATE_TYPE != 'NONE') {
+              sh "git tag v${APP_VERSION}"
+              sh "git push ${env.REPO_URL} --tags"
+            } else {
+              print "this step will be performed if the version is changed"
+            }
           }
         }
 
         stage("Replace develop branch") {
-          if (BRANCH == "main" && ENVIRONMENT == "prod") {
-            // delete develop branch in the remote
-            sh "git push origin --delete develop"
+          steps {
+            if (BRANCH == "main" && ENVIRONMENT == "prod") {
+              // delete develop branch in the remote
+              sh "git push origin --delete develop"
 
-            // create and publish develop branch
-            sh "git checkout -b develop"
-            sh "git push -u origin develop"
-          } else {
-            echo "this stage will be executed only in the production builds..."
+              // create and publish develop branch
+              sh "git checkout -b develop"
+              sh "git push -u origin develop"
+            } else {
+              print "this stage will be executed only in the production builds..."
+            }
           }
         }
 
-      } catch (Exception exception) {
-        throw exception
-      }
     }
 }
+
 def getBuildArgs() {
   def envArgs = [
     APPLICATION_NAME: env.APPLICATION_NAME,
