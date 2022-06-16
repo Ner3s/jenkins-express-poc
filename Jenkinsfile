@@ -6,7 +6,7 @@ pipeline {
     }
     environment {
       APP_NAME = "${env.APPLICATION_NAME}"
-      ENVIRONMENT = env.NODE_ENV == "production" ? "prod" : "qa"
+      ENVIRONMENT = "${env.NODE_ENV == "production" ? "prod" : "qa"}"
       APP_VERSION = getPackageJsonVersion(env.UPDATE_TYPE)
       BRANCH = env.BRANCH_TO_BUILD.replaceAll("origin/", "")
     }
