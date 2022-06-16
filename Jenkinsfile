@@ -41,39 +41,45 @@ pipeline {
 
         stage("Push new version") {
           steps {
-            if (env.UPDATE_TYPE != 'NONE') {
-              sh "git checkout -b ${BRANCH}"
-              sh "git add package.json"
-              sh "git commit -m 'chore(jenkins): update version to ${APP_VERSION}'"
-              sh "git push ${env.REPO_URL} ${BRANCH}"
-            } else {
-              print "this step will be performed if the version is changed"
+            script {
+              if (env.UPDATE_TYPE != 'NONE') {
+                sh "git checkout -b ${BRANCH}"
+                sh "git add package.json"
+                sh "git commit -m 'chore(jenkins): update version to ${APP_VERSION}'"
+                sh "git push ${env.REPO_URL} ${BRANCH}"
+              } else {
+                print "this step will be performed if the version is changed"
+              }
             }
           }
         }
 
         stage("Add version tag") {
           steps {
-            if (env.UPDATE_TYPE != 'NONE') {
-              sh "git tag v${APP_VERSION}"
-              sh "git push ${env.REPO_URL} --tags"
-            } else {
-              print "this step will be performed if the version is changed"
+            script { 
+              if (env.UPDATE_TYPE != 'NONE') {
+                sh "git tag v${APP_VERSION}"
+                sh "git push ${env.REPO_URL} --tags"
+              } else {
+                print "this step will be performed if the version is changed"
+              }
             }
           }
         }
 
         stage("Replace develop branch") {
           steps {
-            if (BRANCH == "main" && ENVIRONMENT == "prod") {
-              // delete develop branch in the remote
-              sh "git push origin --delete develop"
+            script {
+              if (BRANCH == "main" && ENVIRONMENT == "prod") {
+                // delete develop branch in the remote
+                sh "git push origin --delete develop"
 
-              // create and publish develop branch
-              sh "git checkout -b develop"
-              sh "git push -u origin develop"
-            } else {
-              print "this stage will be executed only in the production builds..."
+                // create and publish develop branch
+                sh "git checkout -b develop"
+                sh "git push -u origin develop"
+              } else {
+                print "this stage will be executed only in the production builds..."
+              }
             }
           }
         }
