@@ -30,13 +30,13 @@ pipeline {
 
         stage("Create docker image") {
           steps {
-            sh "docker build -t ${APP_NAME.toLowerCase()}:${APP_VERSION} ."
+            sh "docker build ${getBuildArgs()} -t ${APP_NAME.toLowerCase()}:${APP_VERSION} ."
           }
         }
 
         stage("Create docker container") {
           steps {
-            sh "docker run -d --name ${APP_NAME.toLowerCase()} ${getBuildArgs()} -p ${env.PORT}:${env.PORT} ${APP_NAME.toLowerCase()}:${APP_VERSION}"
+            sh "docker run -d --name ${APP_NAME.toLowerCase()} -p ${env.PORT}:${env.PORT} ${APP_NAME.toLowerCase()}:${APP_VERSION}"
           }
         }
 
