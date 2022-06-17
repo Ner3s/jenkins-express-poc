@@ -34,7 +34,13 @@ pipeline {
           }
         }
 
-        stage("Create docker container") {
+        stage("Delete container") {
+          steps {
+            sh "docker container rm -f ${APP_NAME.toLowerCase()}"
+          }
+        }
+
+        stage("Create container") {
           steps {
             sh "docker run -d --name ${APP_NAME.toLowerCase()} -p ${env.PORT}:${env.PORT} ${APP_NAME.toLowerCase()}:${APP_VERSION}"
           }
