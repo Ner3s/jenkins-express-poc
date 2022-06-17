@@ -16,8 +16,6 @@ pipeline {
 
         stage("Proceed to deploy?") {
           steps {
-            deleteDir()
-            
             timeout(time: 30, unit: "MINUTES") {
               input("Deseja proceder com o Deploy no ambiente de ${ENVIRONMENT}?")
             }
@@ -94,6 +92,13 @@ pipeline {
                 print "this stage will be executed only in the production builds..."
               }
             }
+          }
+        }
+
+        stage("Cleanup workspace"){
+          steps {
+            deleteDir()
+            print 'Workspace cleaned up'
           }
         }
 
