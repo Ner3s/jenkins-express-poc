@@ -50,7 +50,6 @@ pipeline {
           steps {
             script {
               if (env.UPDATE_TYPE != 'NONE') {
-                sh "git checkout ${BRANCH}"
                 sh "git add package.json"
                 sh "git commit -m 'chore(jenkins): update version to ${APP_VERSION}'"
                 sh "git push origin ${BRANCH}"
