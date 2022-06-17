@@ -1,10 +1,9 @@
 pipeline {
     agent any
-    // agent {
-    //   docker {
-    //     image "node:16-alpine"
-    //   }
-    // }
+    options {
+      // This is required if you want to clean before build
+      skipDefaultCheckout(true)
+    }
     environment {
       APP_NAME = "${env.APPLICATION_NAME}"
       ENVIRONMENT = "${env.NODE_ENV == "production" ? "prod" : "qa"}"
@@ -16,9 +15,18 @@ pipeline {
 
         stage("Proceed to deploy?") {
           steps {
+            deleteDir()
+            print 'Workspace cleaned up'
+            
             timeout(time: 30, unit: "MINUTES") {
               input("Deseja proceder com o Deploy no ambiente de ${ENVIRONMENT}?")
             }
+          }
+        }
+
+        stage ("Checkout"){
+          steps {
+            checkout scm
           }
         }
 
@@ -95,14 +103,6 @@ pipeline {
             }
           }
         }
-
-        stage("Cleanup workspace"){
-          steps {
-            deleteDir()
-            print 'Workspace cleaned up'
-          }
-        }
-
     }
 }
 
