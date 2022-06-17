@@ -56,7 +56,7 @@ pipeline {
                   sh "git add package.json"
                   sh "git commit -m 'chore(jenkins): update version to ${APP_VERSION}'"
                   // sh "git push https://${GIT_USERNAME}:${encodedPassword}@github.com/${GIT_USERNAME}/jenkins-express-poc.git ${BRANCH}"
-                  sh "git push https://${GIT_USERNAME}:${encodedPassword}@github.com/${GIT_USERNAME}/jenkins-express-poc.git origin -u develop1"
+                  sh "git push -u https://${GIT_USERNAME}:${encodedPassword}@github.com/${GIT_USERNAME}/jenkins-express-poc.git origin develop1"
                 }
               } else {
                 print "this step will be performed if the version is changed"
