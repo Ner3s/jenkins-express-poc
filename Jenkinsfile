@@ -51,7 +51,7 @@ pipeline {
             script {
               if (env.UPDATE_TYPE != 'NONE') {
                 withCredentials([usernamePassword(credentialsId: '03c6ff66-872c-4a1a-825e-55a6175d54b6', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                  def encodedPassword = URLEncoder.encode("$GIT_PASSWORD",'UTF-8')
+                  def encodedPassword = URLEncoder.encode("${GIT_PASSWORD}",'UTF-8')
                   sh "git add package.json"
                   sh "git commit -m 'chore(jenkins): update version to ${APP_VERSION}'"
                   sh "git push https://${GIT_USERNAME}:${encodedPassword}@github.com/${GIT_USERNAME}/jenkins-express-poc.git ${BRANCH}"
