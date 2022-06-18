@@ -15,6 +15,7 @@ pipeline {
 
         stage("Proceed to deploy?") {
           steps {
+            cleanWs()
             deleteDir()
             print 'Workspace cleaned up'
             
