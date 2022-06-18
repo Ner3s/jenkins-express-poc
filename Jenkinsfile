@@ -58,11 +58,10 @@ pipeline {
           steps {
             script {
               if (env.UPDATE_TYPE != 'NONE') {
-                  sh "git checkout -b ${BRANCH}"
-                  sh "git add package.json"
-                  sh "git commit -m 'chore(jenkins): update version to ${APP_VERSION}'"
-                  sh "git push origin ${BRANCH}"
-                }
+                sh "git checkout -b ${BRANCH}"
+                sh "git add package.json"
+                sh "git commit -m 'chore(jenkins): update version to ${APP_VERSION}'"
+                sh "git push origin ${BRANCH}"
               } else {
                 print "this step will be performed if the version is changed"
               }
