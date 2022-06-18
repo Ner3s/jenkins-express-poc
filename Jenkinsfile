@@ -7,7 +7,7 @@ pipeline {
     environment {
       APP_NAME = "${env.APPLICATION_NAME}"
       ENVIRONMENT = "${env.NODE_ENV == "production" ? "prod" : "qa"}"
-      APP_VERSION = getPackageJsonVersion(env.UPDATE_TYPE)
+      APP_VERSION = ""
       BRANCH = env.BRANCH_TO_BUILD.replaceAll("origin/", "")
     }
 
@@ -33,7 +33,10 @@ pipeline {
 
         stage("Update version") {
           steps {
-            updatePackageJsonVersion(APP_VERSION)
+            script {
+              APP_VERSION = getPackageJsonVersion(env.UPDATE_TYPE)
+              updatePackageJsonVersion(APP_VERSION)
+            }
           }
         }
 
