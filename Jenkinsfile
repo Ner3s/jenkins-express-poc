@@ -58,16 +58,31 @@ pipeline {
           }
         }
 
-        stage("Push new version") {
+        stage("Create commit") {
           steps {
             script {
               if (env.UPDATE_TYPE != 'NONE') {
-                sh "git checkout -b ${BRANCH}"
+                sh "git checkout -B ${BRANCH}"
                 sh "git add package.json"
                 sh "git commit -m 'chore(jenkins): update version to ${APP_VERSION}'"
-                sh "git push ${env.REPO_URL} ${BRANCH}"
               } else {
                 print "this step will be performed if the version is changed"
+              }
+            }
+          }
+        }
+
+        stage("Push to github"){
+          steps {
+            script {
+              sshagent(['$CREDENTIAL_SSH_ID']) {
+                sh('''
+                    #!/usr/bin/env bash
+                    set +x
+                    # If no host key verification is needed, use the option `-oStrictHostKeyChecking=no`
+                    export GIT_SSH_COMMAND="ssh -oStrictHostKeyChecking=no"
+                    git push -u origin $BRANCH
+                ''')
               }
             }
           }
@@ -78,7 +93,15 @@ pipeline {
             script { 
               if (env.UPDATE_TYPE != 'NONE' && BRANCH == 'main') {
                 sh "git tag v${APP_VERSION}"
-                sh "git push ${env.REPO_URL} --tags"
+                sshagent(['$CREDENTIAL_SSH_ID']) {
+                  sh('''
+                      #!/usr/bin/env bash
+                      set +x
+                      # If no host key verification is needed, use the option `-oStrictHostKeyChecking=no`
+                      export GIT_SSH_COMMAND="ssh -oStrictHostKeyChecking=no"
+                      git push --tags
+                  ''')
+                }
               } else {
                 print "this step will be performed if the version is changed"
               }
@@ -90,12 +113,21 @@ pipeline {
           steps {
             script {
               if (BRANCH == "main" && ENVIRONMENT == "prod") {
-                // delete develop branch in the remote
-                sh "git push origin --delete develop"
-
-                // create and publish develop branch
-                sh "git checkout -b develop"
-                sh "git push -u origin develop"
+                sshagent(['$CREDENTIAL_SSH_ID']) {
+                  sh('''
+                      #!/usr/bin/env bash
+                      set +x
+                      # If no host key verification is needed, use the option `-oStrictHostKeyChecking=no`
+                      export GIT_SSH_COMMAND="ssh -oStrictHostKeyChecking=no"
+                      
+                      # Delete develop branch in the remote
+                      git push origin --delete develop
+                      
+                      # Create and publish develop branch in the remote
+                      git checkout -b develop
+                      git push -u origin develop
+                  ''')
+                }
               } else {
                 print "this stage will be executed only in the production builds..."
               }
