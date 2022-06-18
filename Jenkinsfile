@@ -97,7 +97,7 @@ pipeline {
             script { 
               if (env.UPDATE_TYPE != 'NONE' && BRANCH == 'main') {
                 sh "git tag v${APP_VERSION}"
-                sshagent(['$CREDENTIAL_SSH_ID']) {
+                sshagent([env.CREDENTIAL_SSH_ID]) {
                   sh('''
                       #!/usr/bin/env bash
                       set +x
@@ -117,7 +117,7 @@ pipeline {
           steps {
             script {
               if (BRANCH == "main" && ENVIRONMENT == "prod") {
-                sshagent(['$CREDENTIAL_SSH_ID']) {
+                sshagent([env.CREDENTIAL_SSH_ID]) {
                   sh('''
                       #!/usr/bin/env bash
                       set +x
