@@ -75,14 +75,18 @@ pipeline {
         stage("Push to github"){
           steps {
             script {
-              sshagent(['$CREDENTIAL_SSH_ID']) {
-                sh('''
-                    #!/usr/bin/env bash
-                    set +x
-                    # If no host key verification is needed, use the option `-oStrictHostKeyChecking=no`
-                    export GIT_SSH_COMMAND="ssh -oStrictHostKeyChecking=no"
-                    git push -u origin $BRANCH
-                ''')
+              if (env.UPDATE_TYPE != 'NONE') {
+                sshagent([env.CREDENTIAL_SSH_ID]) {
+                  sh('''
+                      #!/usr/bin/env bash
+                      set +x
+                      # If no host key verification is needed, use the option `-oStrictHostKeyChecking=no`
+                      export GIT_SSH_COMMAND="ssh -oStrictHostKeyChecking=no"
+                      git push -u origin $BRANCH
+                  ''')
+                }
+              } else {
+                print "this step will be performed if the version is changed"
               }
             }
           }
@@ -103,7 +107,7 @@ pipeline {
                   ''')
                 }
               } else {
-                print "this step will be performed if the version is changed"
+                print "this step will be performed if the version is changed on main branch"
               }
             }
           }
