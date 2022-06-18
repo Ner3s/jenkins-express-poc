@@ -58,14 +58,10 @@ pipeline {
           steps {
             script {
               if (env.UPDATE_TYPE != 'NONE') {
-                withCredentials([usernamePassword(credentialsId: '03c6ff66-872c-4a1a-825e-55a6175d54b6', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                  def encodedPassword = URLEncoder.encode("${GIT_PASSWORD}",'UTF-8')
-                  sh "git checkout -b develop1"
+                  sh "git checkout -b ${BRANCH}"
                   sh "git add package.json"
                   sh "git commit -m 'chore(jenkins): update version to ${APP_VERSION}'"
-                  sh 'cat package.json'
-                  // sh "git push https://${GIT_USERNAME}:${encodedPassword}@github.com/${GIT_USERNAME}/jenkins-express-poc.git ${BRANCH}"
-                  sh "git push -u https://${GIT_USERNAME}:${encodedPassword}@github.com/${GIT_USERNAME}/jenkins-express-poc.git develop1"
+                  sh "git push origin ${BRANCH}"
                 }
               } else {
                 print "this step will be performed if the version is changed"
