@@ -65,7 +65,7 @@ pipeline {
                 sh "git checkout -b ${BRANCH}"
                 sh "git add package.json"
                 sh "git commit -m 'chore(jenkins): update version to ${APP_VERSION}'"
-                sh "git push origin ${BRANCH}"
+                sh "git push ${env.REPO_URL} ${BRANCH}"
               } else {
                 print "this step will be performed if the version is changed"
               }
